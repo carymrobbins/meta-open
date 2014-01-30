@@ -12,6 +12,7 @@ defaultCommand :: Command
 defaultCommand = "open"
 
 data Program = IntelliJ
+    deriving (Eq, Show)
 
 programMap :: [(Program, GrepMap)]
 programMap =
@@ -27,7 +28,11 @@ fileTypeAssociations =
     ]
 
 getGrepMapForFile :: FilePath -> Maybe GrepMap
-getGrepMapForFile = undefined
+getGrepMapForFile filename = do
+    program <- lookup ext fileTypeAssociations
+    lookup program programMap
+  where
+    ext = takeExtension filename
 
 findRunningFromGrepMap :: Maybe GrepMap -> IO [((GrepKey, Command), Bool)]
 findRunningFromGrepMap Nothing = return []
