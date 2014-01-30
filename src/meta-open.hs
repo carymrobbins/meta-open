@@ -26,11 +26,12 @@ fileTypeAssociations =
     , (".js", IntelliJ)
     ]
 
-getGrepMapForFile :: FilePath -> GrepMap
+getGrepMapForFile :: FilePath -> Maybe GrepMap
 getGrepMapForFile = undefined
 
-findRunningFromGrepMap :: GrepMap -> IO [((GrepKey, Command), Bool)]
-findRunningFromGrepMap = undefined
+findRunningFromGrepMap :: Maybe GrepMap -> IO [((GrepKey, Command), Bool)]
+findRunningFromGrepMap Nothing = return []
+findRunningFromGrepMapi (Just grepMap) = undefined
 
 findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
 findFirstCommand = undefined
@@ -41,10 +42,10 @@ chooseCommand = undefined
 handleFile :: Maybe FilePath -> IO ()
 handleFile Nothing = putStrLn "Usage: meta-open [filename]"
 handleFile (Just filename) = do
-    let grepMap = getGrepMapForFile filename
-    running <- findRunningFromGrepMap grepMap
+    running <- findRunningFromGrepMap . getGrepMapForFile $ filename
     let command = chooseCommand . findFirstCommand $ running
-    runBash . unwords $ [command, filename]
+    runBash . unwords $ [ command, filename ]
+
 
 main :: IO ()
 main = liftM listToMaybe getArgs >>= handleFile
