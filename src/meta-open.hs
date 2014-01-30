@@ -37,7 +37,7 @@ findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
 findFirstCommand = undefined
 
 chooseCommand :: Maybe Command -> Command
-chooseCommand = undefined
+chooseCommand = fromMaybe defaultCommand
 
 handleFile :: Maybe FilePath -> IO ()
 handleFile Nothing = putStrLn "Usage: meta-open [filename]"
@@ -45,7 +45,6 @@ handleFile (Just filename) = do
     running <- findRunningFromGrepMap . getGrepMapForFile $ filename
     let command = chooseCommand . findFirstCommand $ running
     runBash . unwords $ [ command, filename ]
-
 
 main :: IO ()
 main = liftM listToMaybe getArgs >>= handleFile
