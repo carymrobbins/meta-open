@@ -59,7 +59,10 @@ pairM :: Monad m => (a -> m b) -> a -> m (a, b)
 pairM = undefined
 
 isRunning :: GrepKey -> IO Bool
-isRunning grepKey = undefined
+isRunning grepKey = do
+    output <- getBash . concat $
+        [ "ps aux | grep ", show grepKey, " | grep -v grep | cat" ]
+    return $ length output > 0
 
 getBash :: String -> IO String
 getBash cmd = readProcess "bash" ["-c", cmd] ""
