@@ -34,7 +34,7 @@ findRunningFromGrepMap Nothing = return []
 findRunningFromGrepMapi (Just grepMap) = undefined
 
 findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
-findFirstCommand = undefined
+findFirstCommand = liftM (snd . fst) . listToMaybe . filter (id . snd)
 
 chooseCommand :: Maybe Command -> Command
 chooseCommand = fromMaybe defaultCommand
