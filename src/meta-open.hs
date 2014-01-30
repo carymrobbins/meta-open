@@ -56,7 +56,9 @@ main :: IO ()
 main = liftM listToMaybe getArgs >>= handleFile
 
 pairM :: Monad m => (a -> m b) -> a -> m (a, b)
-pairM = undefined
+pairM f x = do
+    result <- f x
+    return (x, result)
 
 isRunning :: GrepKey -> IO Bool
 isRunning grepKey = do
