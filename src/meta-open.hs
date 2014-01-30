@@ -14,10 +14,17 @@ defaultCommand = "open"
 data Program = IntelliJ
 
 programMap :: [(Program, GrepMap)]
-programMap = undefined
+programMap =
+    [ (IntelliJ, [ ("pycharm", "charm")
+                 , ("rubymine", "mine")
+                 ])
+    ]
 
 fileTypeAssociations :: [(String, Program)]
-fileTypeAssociations = undefined
+fileTypeAssociations =
+    [ (".py", IntelliJ)
+    , (".js", IntelliJ)
+    ]
 
 getGrepMapForFile :: FilePath -> GrepMap
 getGrepMapForFile = undefined
