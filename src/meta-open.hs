@@ -31,7 +31,8 @@ getGrepMapForFile = undefined
 
 findRunningFromGrepMap :: Maybe GrepMap -> IO [((GrepKey, Command), Bool)]
 findRunningFromGrepMap Nothing = return []
-findRunningFromGrepMapi (Just grepMap) = undefined
+findRunningFromGrepMap (Just grepMap) =
+    sequence . map (pairM (isRunning . fst)) $ grepMap
 
 findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
 findFirstCommand = liftM (snd . fst) . listToMaybe . filter (id . snd)
