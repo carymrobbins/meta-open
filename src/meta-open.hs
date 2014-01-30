@@ -36,8 +36,7 @@ getGrepMapForFile filename = do
 
 findRunningFromGrepMap :: Maybe GrepMap -> IO [((GrepKey, Command), Bool)]
 findRunningFromGrepMap Nothing = return []
-findRunningFromGrepMap (Just grepMap) =
-    sequence . map (pairM (isRunning . fst)) $ grepMap
+findRunningFromGrepMap (Just grepMap) = mapM (pairM (isRunning . fst)) grepMap
 
 findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
 findFirstCommand = liftM (snd . fst) . listToMaybe . filter (id . snd)
@@ -64,11 +63,11 @@ isRunning :: GrepKey -> IO Bool
 isRunning grepKey = do
     output <- getBash . concat $
         [ "ps aux | grep ", show grepKey, " | grep -v grep | cat" ]
-    return $ length output > 0
+    return . not . null $ output
 
 getBash :: String -> IO String
 getBash cmd = readProcess "bash" ["-c", cmd] ""
 
 runBash :: String -> IO ()
-runBash cmd = getBash cmd >> return ()
+runBash = void . getBash
 
