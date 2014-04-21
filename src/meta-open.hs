@@ -6,16 +6,16 @@ import System.Environment
 import System.FilePath
 import System.Process
 
-getPathToConf = do
-    home <- getHomeDirectory
-    return $ home ++ "/.meta-open.hs"
-
-defaultCommand = "open"
-
 type GrepKey = String
 type Command = String
 type GrepMap = [(GrepKey, Command)]
 type Program = String
+
+defaultCommand :: Command
+defaultCommand = "open"
+
+getPathToConf :: IO FilePath
+getPathToConf = flip fmap getHomeDirectory (</> ".meta-open")
 
 getProgramMap :: Conf -> [(Program, GrepMap)]
 getProgramMap = fromMaybe [] . getConf "programMap"
@@ -23,23 +23,8 @@ getProgramMap = fromMaybe [] . getConf "programMap"
 getFileTypeAssociations :: Conf -> [(String, Program)]
 getFileTypeAssociations = fromMaybe [] . getConf "fileTypeAssociations"
 
-getGrepMapForFile
-    :: [(Program, GrepMap)] -> [(String, Program)] -> FilePath -> Maybe GrepMap
-getGrepMapForFile programMap fileTypeAssociations filename = do
-    program <- lookup ext fileTypeAssociations
-    lookup program programMap
-  where
-    ext = takeExtension filename
-
-findRunningFromGrepMap :: Maybe GrepMap -> IO [((GrepKey, Command), Bool)]
-findRunningFromGrepMap Nothing = return []
-findRunningFromGrepMap (Just grepMap) = mapM (pairM (isRunning . fst)) grepMap
-
-findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
-findFirstCommand = liftM (snd . fst) . listToMaybe . filter (id . snd)
-
-chooseCommand :: Maybe Command -> Command
-chooseCommand = fromMaybe defaultCommand
+main :: IO ()
+main = liftM listToMaybe getArgs >>= handleFile
 
 handleFile :: Maybe FilePath -> IO ()
 handleFile Nothing = putStrLn "Usage: meta-open [filename]"
@@ -52,8 +37,22 @@ handleFile (Just filename) = do
     let command = chooseCommand . findFirstCommand $ running
     runBash . unwords $ [ command, filename ]
 
-main :: IO ()
-main = liftM listToMaybe getArgs >>= handleFile
+getGrepMapForFile
+    :: [(Program, GrepMap)] -> [(String, Program)] -> FilePath -> Maybe GrepMap
+getGrepMapForFile programMap fileTypeAssociations filename = do
+    let ext = takeExtension filename
+    program <- lookup ext fileTypeAssociations
+    lookup program programMap
+
+findRunningFromGrepMap :: Maybe GrepMap -> IO [((GrepKey, Command), Bool)]
+findRunningFromGrepMap Nothing = return []
+findRunningFromGrepMap (Just grepMap) = mapM (pairM (isRunning . fst)) grepMap
+
+findFirstCommand :: [((GrepKey, Command), Bool)] -> Maybe Command
+findFirstCommand = liftM (snd . fst) . listToMaybe . filter (id . snd)
+
+chooseCommand :: Maybe Command -> Command
+chooseCommand = fromMaybe defaultCommand
 
 pairM :: Monad m => (a -> m b) -> a -> m (a, b)
 pairM f x = do
