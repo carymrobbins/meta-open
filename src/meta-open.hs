@@ -1,34 +1,31 @@
 import Control.Monad
+import Data.Conf
 import Data.Maybe
+import System.Directory
 import System.Environment
 import System.FilePath
 import System.Process
 
+getPathToConf = do
+    home <- getHomeDirectory
+    return $ home ++ "/.meta-open.hs"
+
+defaultCommand = "open"
+
 type GrepKey = String
 type Command = String
 type GrepMap = [(GrepKey, Command)]
+type Program = String
 
-defaultCommand :: Command
-defaultCommand = "open"
+getProgramMap :: Conf -> [(Program, GrepMap)]
+getProgramMap = fromMaybe [] . getConf "programMap"
 
-data Program = IntelliJ
-    deriving (Eq, Show)
+getFileTypeAssociations :: Conf -> [(String, Program)]
+getFileTypeAssociations = fromMaybe [] . getConf "fileTypeAssociations"
 
-programMap :: [(Program, GrepMap)]
-programMap =
-    [ (IntelliJ, [ ("pycharm", "charm")
-                 , ("rubymine", "mine")
-                 ])
-    ]
-
-fileTypeAssociations :: [(String, Program)]
-fileTypeAssociations =
-    [ (".py", IntelliJ)
-    , (".js", IntelliJ)
-    ]
-
-getGrepMapForFile :: FilePath -> Maybe GrepMap
-getGrepMapForFile filename = do
+getGrepMapForFile
+    :: [(Program, GrepMap)] -> [(String, Program)] -> FilePath -> Maybe GrepMap
+getGrepMapForFile programMap fileTypeAssociations filename = do
     program <- lookup ext fileTypeAssociations
     lookup program programMap
   where
@@ -47,7 +44,11 @@ chooseCommand = fromMaybe defaultCommand
 handleFile :: Maybe FilePath -> IO ()
 handleFile Nothing = putStrLn "Usage: meta-open [filename]"
 handleFile (Just filename) = do
-    running <- findRunningFromGrepMap . getGrepMapForFile $ filename
+    conf <- readConf =<< getPathToConf
+    let programMap = getProgramMap conf
+    let fileTypeAssociations = getFileTypeAssociations conf
+    let getGrep = getGrepMapForFile programMap fileTypeAssociations
+    running <- findRunningFromGrepMap . getGrep $ filename
     let command = chooseCommand . findFirstCommand $ running
     runBash . unwords $ [ command, filename ]
 

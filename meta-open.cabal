@@ -18,6 +18,8 @@ executable meta-open
   -- other-extensions:    
   build-depends:       base >=4.6 && <4.7
                      , async
+                     , conf
+                     , directory
                      , filepath
                      , parallel
                      , process
