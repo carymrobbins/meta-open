@@ -9,7 +9,10 @@ import System.Process
 type GrepKey = String
 type Command = String
 type GrepMap = [(GrepKey, Command)]
+type FileExt = String
 type Program = String
+type ProgramMap = [(Program, GrepMap)]
+type FileTypeAssociations = [(FileExt, Program)]
 
 defaultCommand :: Command
 defaultCommand = "open"
@@ -17,10 +20,10 @@ defaultCommand = "open"
 getPathToConf :: IO FilePath
 getPathToConf = flip fmap getHomeDirectory (</> ".meta-open")
 
-getProgramMap :: Conf -> [(Program, GrepMap)]
+getProgramMap :: Conf -> ProgramMap
 getProgramMap = fromMaybe [] . getConf "programMap"
 
-getFileTypeAssociations :: Conf -> [(String, Program)]
+getFileTypeAssociations :: Conf -> FileTypeAssociations
 getFileTypeAssociations = fromMaybe [] . getConf "fileTypeAssociations"
 
 main :: IO ()
@@ -38,7 +41,7 @@ handleFile (Just filename) = do
     runBash . unwords $ [ command, filename ]
 
 getGrepMapForFile
-    :: [(Program, GrepMap)] -> [(String, Program)] -> FilePath -> Maybe GrepMap
+    :: ProgramMap -> FileTypeAssociations -> FilePath -> Maybe GrepMap
 getGrepMapForFile programMap fileTypeAssociations filename = do
     let ext = takeExtension filename
     program <- lookup ext fileTypeAssociations
