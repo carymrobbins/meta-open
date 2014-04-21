@@ -44,11 +44,11 @@ continue down the list of `intellij` programs until it finds one.
 Ummmmm, but why?
 ----------------
 
-Good question, I'm glad you asked.  I enjoy enjoy using iTerm's cmd+click
+Good question, I'm glad you asked.  I enjoy using iTerm's cmd+click
 feature to open files that have output from, say, ack.  I may associate `.json`
 files with PyCharm, but if I'm using RubyMine I'd like iTerm to figure that out
 and open my file in the program I'm actually using.  Well, good news for me,
 iTerm supports running a custom command when you cmd+click via
-*Preferences > Profiles > Advanced > Semantic History*.  In my case,
+**Preferences > Profiles > Advanced > Semantic History**.  In my case,
 all I needed to do was use `path/to/meta-open \1` and ack'ing and opening
 became far simpler.
