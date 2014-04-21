@@ -18,7 +18,7 @@ defaultCommand :: Command
 defaultCommand = "open"
 
 getPathToConf :: IO FilePath
-getPathToConf = flip fmap getHomeDirectory (</> ".meta-open")
+getPathToConf = flip fmap getHomeDirectory (</> ".meta-open.hs")
 
 getProgramMap :: Conf -> ProgramMap
 getProgramMap = fromMaybe [] . getConf "programMap"
