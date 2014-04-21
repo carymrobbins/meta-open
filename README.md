@@ -11,6 +11,7 @@ your system's `open` command.
 Here's an example config file:
 
 ```haskell
+-- ~/.meta-open.hs
 programMap =
     [ ("intellij", [ ("pycharm",  "/usr/local/bin/charm")
                    , ("rubymine", "/usr/local/bin/mine")
