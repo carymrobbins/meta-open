@@ -1,3 +1,4 @@
+import Control.Applicative
 import Control.Monad
 import Data.Conf
 import Data.Maybe
@@ -27,17 +28,24 @@ getFileTypeAssociations :: Conf -> FileTypeAssociations
 getFileTypeAssociations = fromMaybe [] . getConf "fileTypeAssociations"
 
 main :: IO ()
-main = liftM listToMaybe getArgs >>= handleFile
+main = getArgs >>= handleFile
 
-handleFile :: Maybe FilePath -> IO ()
-handleFile Nothing = putStrLn "Usage: meta-open [filename]"
-handleFile (Just filename) = do
+handleFile :: [String] -> IO ()
+handleFile [] = putStrLn "Usage: meta-open [filename, [--debug]]"
+handleFile [ filename ] = handleFile [ filename, "" ]
+handleFile (filename : debugFlag : _) = do
+    let debug = debugFlag == "--debug"
+    let printIfDebug xs = if debug then putStrLn . concat $ xs else pure ()
     conf <- readConf =<< getPathToConf
     let programMap = getProgramMap conf
+    printIfDebug [ "programMap: ", show programMap ]
     let fileTypeAssociations = getFileTypeAssociations conf
+    printIfDebug [ "fileTypeAssociations: ", show fileTypeAssociations ]
     let getGrep = getGrepMapForFile programMap fileTypeAssociations
     running <- findRunningFromGrepMap . getGrep $ filename
+    printIfDebug [ "running: ", show running ]
     let command = chooseCommand . findFirstCommand $ running
+    printIfDebug [ "command: ", show command ]
     runBash . unwords $ [ command, filename ]
 
 getGrepMapForFile
