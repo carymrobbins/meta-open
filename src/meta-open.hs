@@ -34,18 +34,17 @@ handleFile :: [String] -> IO ()
 handleFile [] = putStrLn "Usage: meta-open [filename, [--debug]]"
 handleFile [ filename ] = handleFile [ filename, "" ]
 handleFile (filename : debugFlag : _) = do
-    let debug = debugFlag == "--debug"
-    let printIfDebug xs = if debug then putStrLn . concat $ xs else pure ()
+    let debug = when (debugFlag == "--debug") . putStrLn . concat
     conf <- readConf =<< getPathToConf
     let programMap = getProgramMap conf
-    printIfDebug [ "programMap: ", show programMap ]
+    debug [ "programMap: ", show programMap ]
     let fileTypeAssociations = getFileTypeAssociations conf
-    printIfDebug [ "fileTypeAssociations: ", show fileTypeAssociations ]
+    debug [ "fileTypeAssociations: ", show fileTypeAssociations ]
     let getGrep = getGrepMapForFile programMap fileTypeAssociations
     running <- findRunningFromGrepMap . getGrep $ filename
-    printIfDebug [ "running: ", show running ]
+    debug [ "running: ", show running ]
     let command = chooseCommand . findFirstCommand $ running
-    printIfDebug [ "command: ", show command ]
+    debug [ "command: ", show command ]
     runBash . unwords $ [ command, filename ]
 
 getGrepMapForFile
